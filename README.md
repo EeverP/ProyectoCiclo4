@@ -2,7 +2,7 @@
 
 ### Branches
 
-- main (trabajo completo)
+- main (trabajo completado)
 - sprint_1 ✅
 - sprint_2 ✅
 - sprint_3
