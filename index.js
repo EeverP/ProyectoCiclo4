@@ -11,10 +11,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 //app.use(bodyParser.raw());
 
 // Conexion a la base de datos
-mongoose.connect("mongodb+srv://admin:admin123@tallermecanico.7z3am15.mongodb.net/Taller?retryWrites=true&w=majority");
+mongoose.connect("");
 
 
-//Schema Cliente
+// Schema Cliente
 const clienteSchema = new mongoose.Schema({
     documento: String,
     nombre: String,
@@ -27,7 +27,24 @@ const clienteSchema = new mongoose.Schema({
     contrasenia: String
 });
 
+// Schema Vehículo
+const vehiculoSchema = new mongoose.Schema({
+    placa: String,
+    tipo: String,
+    marca: String,
+    modelo: String,
+    cantidad_pasajeros: String,
+    cilindraje: String,
+    pais_origen: String,
+    descripcion: String,
+    id_propietario: String
+});
+
+
 const clienteModelo = mongoose.model("clientes", clienteSchema);
+
+const vehiculoModelo = mongoose.model("vehiculos", vehiculoSchema);
+
 
 app.get("/", (request, response) => {
     response.send("Realiciste una petición");
@@ -38,7 +55,7 @@ app.get("/", (request, response) => {
 // Registrar cliente -----------------
 app.post("/AgregarCliente", (request, response) => {
 
-    let clienteNuevo = new clienteModelo({
+    let nuevoCliente = new clienteModelo({
         documento: request.body.documento,
         nombre: request.body.nombre,
         apellido: request.body.apellido,
@@ -50,7 +67,7 @@ app.post("/AgregarCliente", (request, response) => {
         contrasenia: request.body.contrasenia
     });
 
-    clienteNuevo.save(function (error, documento) {
+    nuevoCliente.save(function (error, documento) {
         if (error) {
             response.send("Error al agregar usuario");
         } else {
@@ -60,14 +77,14 @@ app.post("/AgregarCliente", (request, response) => {
 });
 
 //Obtener Clientes
-app.get("Clientes", (request, response) => {
+app.get("/Clientes", (request, response) => {
     clienteModelo.find(function (error, documentos) {
         response.send(documentos)
     });
 });
 
 //Editar Cliente
-app.put("EditarCliente", function (request, response) {
+app.put("/EditarCliente", function (request, response) {
     const filter = { documento: request.body.documento };
     const update = { documento: String(request.body.documento) };
 
@@ -80,6 +97,18 @@ app.put("EditarCliente", function (request, response) {
         }
     });
 });
+
+//Obtener Cliente por ID
+app.get("/ClienteId", (request, response) => {
+    clienteModelo.find(
+        { documento: request.body.documento | request.param("docuemnto")},
+        function (error, docuemnto) {
+            response.send(docuemnto)
+        }
+    )
+});
+
+
 
 //Eliminar Cliente
 app.delete("/EliminarCliente", function (request, response) {
@@ -97,15 +126,81 @@ app.delete("/EliminarCliente", function (request, response) {
 
 //::::::::::::::::::::::::: fin CRUD cliente
 
-//::::::::::::::::::::::::: CRUD Mecánico
+//::::::::::::::::::::::::: CRUD Vehículo
+
+// Registrar vehiculo
+app.post("/AgregarVehiculo", (request, response) => {
+
+    let nuevoVehiculo = new vehiculoModelo({
+        placa: request.body.placa,
+        tipo: request.body.tipo,
+        marca: request.body.marca,
+        modelo: request.body.modelo,
+        cantidda_pasajeros: request.body.cantidad_pasajeros,
+        cilindraje: request.body.cilindraje,
+        pais_origen: request.body.pais_origen,
+        descripcion: request.body.descripcion,
+        id_propietario: request.body.id_propietario
+    });
+
+    nuevoVehiculo.save(function (error, documento) {
+        if (error) {
+            response.send("Error al agregar vehículo");
+        } else {
+            response.send("Vehículo agregado exitosamente");
+        }
+    })
+});
+
+// Obtener vehículos
+app.get("/Vehiculos", (request, response) =>{
+    vehiculoModelo.find( function(error, documentos) {
+        response.send(documentos);
+    });
+});
+
+//Obtener vehículo por ID
+app.get("/VehiculoId", (request, response) => {
+    vehiculoModelo.find(
+        { documento: request.body.documento | request.param("docuemnto")},
+        function (error, docuemnto) {
+            response.send(docuemnto)
+        }
+    )
+});
 
 
+// Editar Vehículo 
+app.put("/EditarVehiculo", function (request, response) {
+    const filter = { documento: request.body.documento };
+    const update = { marca: String(request.body.marca),
+                   tipo: String(request.body.tipo)
+    };
 
+    vehiculoModelo.findOneAndUpdate(filter, update, function (error, documento){
+        if(error) {
+            console.log(error);
+            response.send("error al editar el vehículo.")
+        } else {
+            response.send("El vehículo ha sido editado.")
+        }
+    });
+});
 
+// Eliminar Vehículo
+app.delete("/EliminarVehiculo", function (request, response) {
+    vehiculoModelo.deleteOne(
+        {documento: request.body.documento | request.param("documento") },
+        function (error, documento) {
+            if (error){
+                response.send("Error al eliminar el vehículo.");
+            } else {
+                response.send("El vehículo ha sido eliminado");
+            }
+        }
 
-
-
-
+    );
+});
 
 
 
